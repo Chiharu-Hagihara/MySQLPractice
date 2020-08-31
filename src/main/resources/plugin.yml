@@ -1,3 +1,5 @@
 name: MySQLPractice
-version: ${project.version}
+version: 1.0
 main: chiharu.hagihara.mysqlpractice.MySQLPractice
+commands:
+  memo:
