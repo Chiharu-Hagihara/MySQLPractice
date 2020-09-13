@@ -1,5 +1,6 @@
 package chiharu.hagihara.mysqlpractice
 
+import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
@@ -21,31 +22,33 @@ class MySQLPractice : JavaPlugin() , Listener{
     }
 
     @EventHandler
-    fun onLogin(e: PlayerJoinEvent){
-        val p = e.player
-        val address = p.address.hostString
+    fun onLogin(e: PlayerJoinEvent) {
+        Thread(Runnable {
+            val p = e.player
+            val address = p.address.hostString
 
-        if (address == null){
-            logger.info("${p.name}のIPアドレスの取得に失敗！")
-            return
-        }
+            if (address == null) {
+                logger.info("${p.name}のIPアドレスの取得に失敗！")
+                return@Runnable
+            }
 
-        val mysql = MySQLManager(this, "MySQLPractice")
-        val rs = mysql.query("SELECT * FROM mp_loginlog WHERE uuid='${p.uniqueId}';")?:return
+            val mysql = MySQLManager(this, "MySQLPractice")
+            val rs = mysql.query("SELECT * FROM mp_loginlog WHERE uuid='${p.uniqueId}';") ?: return@Runnable
 
-        if (rs.next()){
-            mysql.execute("UPDATE mp_loginlog SET mcid='${p.name}' address='${address}' WHERE uuid='${rs.getString("address")}';")
+            if (rs.next()) {
+                mysql.execute("UPDATE mp_loginlog SET mcid='${p.name}' address='${address}' WHERE uuid='${rs.getString("address")}';")
+
+                rs.close()
+                mysql.close()
+
+                return@Runnable
+            }
 
             rs.close()
             mysql.close()
 
-            return
-        }
-
-        rs.close()
-        mysql.close()
-
-        mysql.execute("INSERT INTO mp_loginlog (mcid,uuid,address) VALUES ('${p.name}','${p.uniqueId}','${address}');")
+            mysql.execute("INSERT INTO mp_loginlog (mcid,uuid,address) VALUES ('${p.name}','${p.uniqueId}','${address}');")
+         }).start()
     }
 
 }
