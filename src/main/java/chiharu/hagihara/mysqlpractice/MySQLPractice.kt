@@ -36,7 +36,7 @@ class MySQLPractice : JavaPlugin() , Listener{
             val rs = mysql.query("SELECT * FROM mp_loginlog WHERE uuid='${p.uniqueId}';") ?: return@Runnable
 
             if (rs.next()) {
-                mysql.execute("UPDATE mp_loginlog SET mcid='${p.name}' address='${address}' WHERE uuid='${rs.getString("address")}';")
+                mysql.execute("UPDATE mp_loginlog SET mcid='${p.name}', address='${address}' WHERE uuid='${p.uniqueId}';")
 
                 rs.close()
                 mysql.close()
